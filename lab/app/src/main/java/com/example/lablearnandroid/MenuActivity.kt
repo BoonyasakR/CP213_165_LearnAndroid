@@ -51,6 +51,30 @@ class MenuActivity : ComponentActivity() {
                 onOpenSharedPrefs = {
                     startActivity(Intent(this@MenuActivity, SharedPreferencesActivity::class.java))
                 },
+                onOpenLikeAnimation = {
+                    startActivity(Intent(this@MenuActivity, LikeAnimationActivity::class.java))
+                },
+                onOpenContactPagination = {
+                    startActivity(Intent(this@MenuActivity, ContactPaginationActivity::class.java))
+                },
+                onOpenDonutChart = {
+                    startActivity(Intent(this@MenuActivity, DonutChartActivity::class.java))
+                },
+                onOpenSwipeTodo = {
+                    startActivity(Intent(this@MenuActivity, SwipeToDismissTodoActivity::class.java))
+                },
+                onOpenSnackbarSideEffect = {
+                    startActivity(Intent(this@MenuActivity, SnackbarSideEffectActivity::class.java))
+                },
+                onOpenWebViewInterop = {
+                    startActivity(Intent(this@MenuActivity, WebViewInteropActivity::class.java))
+                },
+                onOpenTransitionDemo = {
+                    startActivity(Intent(this@MenuActivity, TransitionDemoMainActivity::class.java))
+                },
+                onOpenAdaptiveProfile = {
+                    startActivity(Intent(this@MenuActivity, AdaptiveProfileActivity::class.java))
+                },
             )
         }
     }
@@ -66,6 +90,14 @@ private fun MenuScreen(
     onOpenMvvm: () -> Unit,
     onOpenMvi: () -> Unit,
     onOpenSharedPrefs: () -> Unit,
+    onOpenLikeAnimation: () -> Unit,
+    onOpenContactPagination: () -> Unit,
+    onOpenDonutChart: () -> Unit,
+    onOpenSwipeTodo: () -> Unit,
+    onOpenSnackbarSideEffect: () -> Unit,
+    onOpenWebViewInterop: () -> Unit,
+    onOpenTransitionDemo: () -> Unit,
+    onOpenAdaptiveProfile: () -> Unit,
 ) {
     val menuItems = listOf(
         "Camera Permission Flow" to onOpenCameraFlow,
@@ -76,6 +108,14 @@ private fun MenuScreen(
         "MVVM Counter" to onOpenMvvm,
         "MVI Counter" to onOpenMvi,
         "SharedPreferences" to onOpenSharedPrefs,
+        "Mission 1: Compose Like Animation" to onOpenLikeAnimation,
+        "Mission 2: Contacts Sticky Pagination" to onOpenContactPagination,
+        "Mission 3: Canvas Donut Chart" to onOpenDonutChart,
+        "Mission 4: Swipe To Dismiss To-Do" to onOpenSwipeTodo,
+        "Mission 5: Snackbar Side Effects" to onOpenSnackbarSideEffect,
+        "Mission 6: WebView Interop" to onOpenWebViewInterop,
+        "Mission 7: Activity Transition Demo" to onOpenTransitionDemo,
+        "Mission 8: Adaptive Profile Layout" to onOpenAdaptiveProfile,
     )
 
     Column(
