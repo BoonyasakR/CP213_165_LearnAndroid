@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../models/subject_model.dart';
 import '../models/tutor_model.dart';
 import '../utils/app_constants.dart';
 
@@ -17,12 +16,9 @@ class TutorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final subjectTexts = tutor.subjects.isEmpty
+    final subjectTexts = tutor.preferredSubjects.isEmpty
         ? 'ยังไม่ระบุ'
-        : tutor.subjects
-            .map((SubjectLevel s) =>
-                s.level == null ? s.subject : '${s.subject} (${s.level})')
-            .join(', ');
+        : tutor.preferredSubjects.join(', ');
 
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),

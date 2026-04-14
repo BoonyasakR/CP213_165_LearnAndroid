@@ -53,7 +53,7 @@ class _TutorDashboardScreenState extends State<TutorDashboardScreen> {
   Map<String, List<ScheduleBlock>> _schedule = {
     for (final day in AppConstants.scheduleDaysEn) day: <ScheduleBlock>[],
   };
-  List<Map<String, String?>> _subjects = [];
+  List<String?> _preferredSubjects = List<String?>.filled(3, null);
   bool _loading = true;
   bool _saving = false;
   bool _readOnly = false;
@@ -113,10 +113,7 @@ class _TutorDashboardScreenState extends State<TutorDashboardScreen> {
         } else {
           _profileImageBytes = null;
         }
-        _subjects = ((tutor['subjects'] as List<dynamic>? ?? [])
-                .map((e) => Map<String, String?>.from(e as Map))
-                .toList())
-            .cast<Map<String, String?>>();
+        _preferredSubjects = _initialPreferredSubjects(tutor);
         final scheduleMap = Map<String, dynamic>.from(tutor['schedule'] as Map? ?? {});
         _schedule = {
           for (final day in AppConstants.scheduleDaysEn)
@@ -126,6 +123,7 @@ class _TutorDashboardScreenState extends State<TutorDashboardScreen> {
         };
       } else {
         _teachingConditionController.clear();
+        _preferredSubjects = List<String?>.filled(3, null);
       }
     });
   }
@@ -156,7 +154,8 @@ class _TutorDashboardScreenState extends State<TutorDashboardScreen> {
       'currentActivity': _activityController.text.trim(),
       'travelTime': _travelTimeController.text.trim(),
       'teachingCondition': _teachingConditionController.text.trim(),
-      'subjects': _subjects,
+      'preferredSubjects': _preferredSubjects.whereType<String>().toList(),
+      'subjects': FieldValue.delete(),
       'schedule': {
         for (final day in AppConstants.scheduleDaysEn)
           day: _schedule[day]?.map((e) => e.toJson()).toList() ?? [],
@@ -170,6 +169,7 @@ class _TutorDashboardScreenState extends State<TutorDashboardScreen> {
     if (success) {
       final updatedData = Map<String, dynamic>.from(payload);
       updatedData.remove('updatedAt');
+      updatedData.remove('subjects');
       setState(() {
         _tutor = {
           ...?_tutor,
@@ -617,7 +617,7 @@ class _TutorDashboardScreenState extends State<TutorDashboardScreen> {
                     children: [
                       _buildProfileCard(),
                       const SizedBox(height: 20),
-                      _buildSubjects(),
+                      _buildPreferredSubjects(),
                       const SizedBox(height: 16),
                       _buildTeachingConditionField(),
                       const SizedBox(height: 20),
@@ -904,7 +904,9 @@ class _TutorDashboardScreenState extends State<TutorDashboardScreen> {
     );
   }
 
-  Widget _buildSubjects() {
+  Widget _buildPreferredSubjects() {
+    final List<String> subjectOptions = _preferredSubjectOptions();
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -921,153 +923,164 @@ class _TutorDashboardScreenState extends State<TutorDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Expanded(
-                child: Text('วิชาที่สอน',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              ),
-              if (!_readOnly)
-                IconButton(
-                  icon: const Icon(Icons.add_circle_outline,
-                      color: Colors.black87, size: 28),
-                  onPressed: _addSubject,
-                ),
-            ],
+          const Text(
+            'วิชาที่สอน',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 12),
-          if (_subjects.isEmpty)
-            const Center(
-              child: Text('ยังไม่ได้เลือกวิชา',
-                  style: TextStyle(fontSize: 14, color: Colors.grey)),
-            )
-          else
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _subjects.map((subject) {
-                final label = subject['level'] == null
-                    ? subject['subject']
-                    : '${subject['subject']} (${subject['level']})';
-                return Chip(
-                  label: Text(label ?? ''),
-                  backgroundColor: AppConstants.lightPink,
-                  labelStyle: const TextStyle(color: Colors.black87, fontSize: 13),
-                  shape: StadiumBorder(
-                    side: BorderSide(
-                      color: Colors.black
-                          .withAlpha((0.5 * 255).round()),
-                      width: 1,
+          const SizedBox(height: 16),
+          ...List<Widget>.generate(_preferredSubjects.length, (index) {
+            final String? selectedValue = _preferredSubjects[index];
+            final List<String> availableOptions = subjectOptions
+                .where(
+                  (subject) =>
+                      subject == selectedValue ||
+                      !_preferredSubjects.whereType<String>().contains(subject),
+                )
+                .toList();
+
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: index == _preferredSubjects.length - 1 ? 0 : 12,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 84,
+                    child: Text(
+                      'อันดับที่ ${index + 1}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
-                  deleteIcon: _readOnly
-                      ? null
-                      : const Icon(Icons.close, size: 18, color: Colors.black87),
-                  onDeleted: _readOnly
-                      ? null
-                      : () {
-                          setState(() => _subjects.remove(subject));
-                        },
-                );
-              }).toList(),
+                  const SizedBox(width: 1),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      initialValue: selectedValue,
+                      isExpanded: true,
+                      decoration: InputDecoration(
+                        hintText: 'เลือกวิชา',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(
+                            color: Colors.black54,
+                            width: 1.4,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(
+                            color: Colors.black54,
+                            width: 1.4,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(
+                            color: Colors.black87,
+                            width: 1.6,
+                          ),
+                        ),
+                        disabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(
+                            color: Colors.black26,
+                            width: 1.2,
+                          ),
+                        ),
+                      ),
+                      items: [
+                        const DropdownMenuItem<String>(
+                          value: null,
+                          child: Text('เลือกวิชา'),
+                        ),
+                        ...availableOptions.map(
+                          (subject) => DropdownMenuItem<String>(
+                            value: subject,
+                            child: Text(subject),
+                          ),
+                        ),
+                      ],
+                      onChanged: _readOnly
+                          ? null
+                          : (value) {
+                              setState(() {
+                                _preferredSubjects[index] = value;
+                              });
+                            },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+          if (!_readOnly) ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton.icon(
+                onPressed: _addPreferredSubjectRow,
+                icon: const Icon(Icons.add, size: 18, color: Colors.black87),
+                label: const Text(
+                  'เพิ่มวิชา',
+                  style: TextStyle(color: Colors.black87),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.black54, width: 1.2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                ),
+              ),
             ),
+          ],
         ],
       ),
     );
   }
 
-  Future<void> _addSubject() async {
-    if (_readOnly) return;
-    final options = <Map<String, String?>>[];
+  List<String?> _initialPreferredSubjects(Map<String, dynamic> tutor) {
+    final List<String> preferred = (tutor['preferredSubjects']
+                as List<dynamic>? ??
+            const <dynamic>[])
+        .whereType<String>()
+        .where((subject) => subject.isNotEmpty)
+        .toList();
+    final List<String?> selected = List<String?>.filled(
+      preferred.length > 3 ? preferred.length : 3,
+      null,
+    );
+    for (int index = 0; index < preferred.length; index++) {
+      selected[index] = preferred[index];
+    }
+    return selected;
+  }
+
+  List<String> _preferredSubjectOptions() {
+    final List<String> options = <String>[];
     for (final entry in AppConstants.subjectLevels.entries) {
       if (entry.value.isEmpty) {
-        options.add({'subject': entry.key, 'level': null});
-      } else {
-        for (final level in entry.value) {
-          options.add({'subject': entry.key, 'level': level});
-        }
+        options.add(entry.key);
+        continue;
+      }
+      for (final level in entry.value) {
+        options.add('${entry.key} $level');
       }
     }
+    return options;
+  }
 
-    final existingKeys = _subjects
-        .map((e) => '${e['subject']}|${e['level'] ?? ''}')
-        .toSet();
-    final selectedKeys = Set<String>.from(existingKeys);
-
-    await showDialog<void>(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              title: const Text('เลือกวิชาที่สอน'),
-              content: SizedBox(
-                width: 320,
-                height: 360,
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: options.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
-                  itemBuilder: (context, index) {
-                    final option = options[index];
-                    final key = '${option['subject']}|${option['level'] ?? ''}';
-                    final display = option['level'] == null
-                        ? option['subject']!
-                        : '${option['subject']} (${option['level']})';
-                    return CheckboxListTile(
-                      activeColor: AppConstants.primaryPurple,
-                      value: selectedKeys.contains(key),
-                      title: Text(display),
-                      onChanged: (value) {
-                        setDialogState(() {
-                          if (value ?? false) {
-                            selectedKeys.add(key);
-                          } else {
-                            selectedKeys.remove(key);
-                          }
-                        });
-                      },
-                    );
-                  },
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('ยกเลิก'),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppConstants.primaryPurple,
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: () {
-                    final ordered = <Map<String, String?>>[];
-                    for (final option in options) {
-                      final key = '${option['subject']}|${option['level'] ?? ''}';
-                      if (selectedKeys.contains(key)) {
-                        ordered.add({
-                          'subject': option['subject']!,
-                          'level': option['level'],
-                        });
-                      }
-                    }
-                    setState(() {
-                      _subjects
-                        ..clear()
-                        ..addAll(ordered);
-                    });
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('ยืนยัน'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
+  void _addPreferredSubjectRow() {
+    if (_readOnly) return;
+    setState(() {
+      _preferredSubjects = [..._preferredSubjects, null];
+    });
   }
 
   Widget _buildSchedule() {

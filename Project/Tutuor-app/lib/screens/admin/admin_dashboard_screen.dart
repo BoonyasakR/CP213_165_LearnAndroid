@@ -9,6 +9,7 @@ import '../../services/filter_service.dart';
 import '../../services/storage_service.dart';
 import '../../utils/app_constants.dart';
 import '../../utils/app_routes.dart';
+import '../../utils/error_handler.dart';
 import '../../widgets/colon_aligned_hour_header.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
@@ -160,12 +161,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   Future<void> _loadTutors() async {
     setState(() => _loading = true);
-    final tutors = await _storageService.getAllTutors();
-    setState(() {
-      _allTutors = tutors;
-      _filteredTutors = tutors;
-      _loading = false;
-    });
+    try {
+      final tutors = await _storageService.getAllTutors();
+      if (!mounted) return;
+      setState(() {
+        _allTutors = tutors;
+        _filteredTutors = tutors;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      showSnackBar(context, e.toString(), isError: true);
+    }
   }
 
   Future<void> _applyFilters() async {
@@ -174,17 +182,23 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         .where((label) => label != 'ทั้งหมด')
         .toList(growable: false);
     final timeSlots = _buildSelectedTimeSlots();
-    final results = await _filterService.applyFilters(
-      subjectLabels: subjectLabels.isEmpty ? null : subjectLabels,
-      timeSlots: timeSlots,
-    );
-    if (!mounted) {
-      return;
+    try {
+      final results = await _filterService.applyFilters(
+        subjectLabels: subjectLabels.isEmpty ? null : subjectLabels,
+        timeSlots: timeSlots,
+      );
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _filteredTutors = results;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      showSnackBar(context, e.toString(), isError: true);
     }
-    setState(() {
-      _filteredTutors = results;
-      _loading = false;
-    });
   }
 
   void _clearFilters() {

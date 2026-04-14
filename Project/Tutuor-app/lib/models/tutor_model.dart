@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'schedule_model.dart';
-import 'subject_model.dart';
 
 class Tutor {
   const Tutor({
@@ -14,7 +13,7 @@ class Tutor {
     required this.travelTime,
     required this.teachingCondition,
     required this.profileImageBase64,
-    required this.subjects,
+    required this.preferredSubjects,
     required this.schedule,
     required this.createdAt,
     required this.updatedAt,
@@ -29,7 +28,7 @@ class Tutor {
   final String travelTime;
   final String teachingCondition;
   final String profileImageBase64;
-  final List<SubjectLevel> subjects;
+  final List<String> preferredSubjects;
   final Map<String, List<ScheduleBlock>> schedule;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -50,16 +49,10 @@ class Tutor {
       travelTime: json['travelTime'] as String? ?? '',
       teachingCondition: json['teachingCondition'] as String? ?? '',
       profileImageBase64: json['profileImageBase64'] as String? ?? '',
-      subjects: (json['subjects'] as List<dynamic>?)
-              ?.map(
-                (e) => SubjectLevel.fromJson(
-                  Map<String, dynamic>.from(
-                    e as Map<dynamic, dynamic>,
-                  ),
-                ),
-              )
+      preferredSubjects: (json['preferredSubjects'] as List<dynamic>?)
+              ?.whereType<String>()
               .toList() ??
-          const <SubjectLevel>[],
+          const <String>[],
       schedule: _parseSchedule(json['schedule'] as Map<String, dynamic>?),
       createdAt: _parseTimestamp(json['createdAt']),
       updatedAt: _parseTimestamp(json['updatedAt']),
@@ -76,7 +69,7 @@ class Tutor {
       'travelTime': travelTime,
       'teachingCondition': teachingCondition,
       'profileImageBase64': profileImageBase64,
-      'subjects': subjects.map((s) => s.toJson()).toList(),
+      'preferredSubjects': preferredSubjects,
       'schedule': schedule.map((key, value) => MapEntry(
             key,
             value.map((block) => block.toJson()).toList(),
@@ -95,7 +88,7 @@ class Tutor {
     String? travelTime,
     String? profileImageBase64,
     String? teachingCondition,
-    List<SubjectLevel>? subjects,
+    List<String>? preferredSubjects,
     Map<String, List<ScheduleBlock>>? schedule,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -110,7 +103,7 @@ class Tutor {
       travelTime: travelTime ?? this.travelTime,
       profileImageBase64: profileImageBase64 ?? this.profileImageBase64,
       teachingCondition: teachingCondition ?? this.teachingCondition,
-      subjects: subjects ?? this.subjects,
+      preferredSubjects: preferredSubjects ?? this.preferredSubjects,
       schedule: schedule ?? this.schedule,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

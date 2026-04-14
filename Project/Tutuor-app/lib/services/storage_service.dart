@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../utils/error_handler.dart';
+
 class StorageService {
   StorageService({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
@@ -18,7 +20,7 @@ class StorageService {
           .map((doc) => {'id': doc.id, ...doc.data()})
           .toList();
     } catch (e) {
-      return [];
+      throw Exception(getFirestoreErrorMessage(e));
     }
   }
 

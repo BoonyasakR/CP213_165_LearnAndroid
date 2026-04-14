@@ -22,7 +22,7 @@ class TutorService {
       final payload = {
         ...data,
         'profileImageBase64': base64Image,
-        'subjects': <Map<String, dynamic>>[],
+        'preferredSubjects': <String>[],
         'schedule': {
           'saturday': [],
           'sunday': [],

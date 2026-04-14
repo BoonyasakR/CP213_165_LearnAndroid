@@ -11,9 +11,13 @@ class FilterService {
     List<String>? subjectLabels,
     Map<String, List<Map<String, String>>>? timeSlots,
   }) async {
-    final tutors = await _storageService.getAllTutors();
-    final filteredBySubject = _filterBySubject(tutors, subjectLabels);
-    return _filterByTime(filteredBySubject, timeSlots);
+    try {
+      final tutors = await _storageService.getAllTutors();
+      final filteredBySubject = _filterBySubject(tutors, subjectLabels);
+      return _filterByTime(filteredBySubject, timeSlots);
+    } catch (e) {
+      rethrow;
+    }
   }
 
   List<Map<String, dynamic>> _filterBySubject(
@@ -31,24 +35,24 @@ class FilterService {
       return tutors;
     }
     return tutors.where((tutor) {
-      final List<Map<String, dynamic>> subjects =
-          (tutor['subjects'] as List<dynamic>? ?? [])
-              .map((e) => Map<String, dynamic>.from(e as Map))
+      final List<_SubjectQuery> preferredSubjects =
+          (tutor['preferredSubjects'] as List<dynamic>? ?? [])
+              .whereType<String>()
+              .map(_parsePreferredSubject)
+              .where((query) => query.subject.isNotEmpty)
               .toList();
-      if (subjects.isEmpty) {
+      if (preferredSubjects.isEmpty) {
         return false;
       }
       return queries.every((query) {
-        return subjects.any((entry) {
-          final String entrySubject = (entry['subject'] as String? ?? '').trim();
-          if (entrySubject != query.subject) {
+        return preferredSubjects.any((entry) {
+          if (entry.subject != query.subject) {
             return false;
           }
           if (query.level == null || query.level!.isEmpty) {
             return true;
           }
-          final String? entryLevel = (entry['level'] as String?)?.trim();
-          return entryLevel == query.level;
+          return entry.level == query.level;
         });
       });
     }).toList();
@@ -115,6 +119,25 @@ class FilterService {
       final String subject = trimmed.substring(0, altOpen).trim();
       final String level = trimmed.substring(altOpen + 1, altClose).trim();
       return _SubjectQuery(subject, level.isEmpty ? null : level);
+    }
+    return _SubjectQuery(trimmed, null);
+  }
+
+  _SubjectQuery _parsePreferredSubject(String value) {
+    final String trimmed = value.trim();
+    if (trimmed.isEmpty) {
+      return const _SubjectQuery('', null);
+    }
+    final List<String> knownSubjects = AppConstants.subjectLevels.keys.toList()
+      ..sort((a, b) => b.length.compareTo(a.length));
+    for (final subject in knownSubjects) {
+      if (trimmed == subject) {
+        return _SubjectQuery(subject, null);
+      }
+      if (trimmed.startsWith('$subject ')) {
+        final String level = trimmed.substring(subject.length + 1).trim();
+        return _SubjectQuery(subject, level.isEmpty ? null : level);
+      }
     }
     return _SubjectQuery(trimmed, null);
   }
