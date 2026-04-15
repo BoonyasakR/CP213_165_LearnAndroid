@@ -15,12 +15,11 @@ class DefaultFirebaseOptions {
 
   /// Firebase configuration used by the Flutter web build.
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCbI0QF1xmDZK9XUFq-0FZjYTMH8x5VF2Y',
-    appId: '1:406570908743:web:765d7fe9c4eed33c5e8562',
-    messagingSenderId: '406570908743',
-    projectId: 'bankrulek-95bb5',
-    authDomain: 'bankrulek-95bb5.firebaseapp.com',
-    storageBucket: 'bankrulek-95bb5.appspot.com',
-    measurementId: 'G-WFDPJQM010',
+    apiKey: 'AIzaSyC4S2JpqexG9vYwYVn0camTBcLfQGElLyw',
+    appId: '1:22043008629:web:6dd2e5ce8ad67f0ced623c',
+    messagingSenderId: '22043008629',
+    projectId: 'project-mobile-5a6f5',
+    authDomain: 'project-mobile-5a6f5.firebaseapp.com',
+    storageBucket: 'project-mobile-5a6f5.firebasestorage.app',
   );
 }

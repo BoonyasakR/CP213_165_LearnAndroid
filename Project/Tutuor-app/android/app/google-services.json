@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "406570908743",
-    "project_id": "bankrulek-95bb5",
-    "storage_bucket": "bankrulek-95bb5.firebasestorage.app"
+    "project_number": "22043008629",
+    "project_id": "project-mobile-5a6f5",
+    "storage_bucket": "project-mobile-5a6f5.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:406570908743:android:bc7eea164818cc325e8562",
+        "mobilesdk_app_id": "1:22043008629:android:1809d5b7f5d25f0eed623c",
         "android_client_info": {
           "package_name": "com.example.brankrulek"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAWEZcv1yPIyHWv1kt7c_q5_hJlEWG5qxs"
+          "current_key": "AIzaSyCRa3z2ThOU1XeE3oebMxNg3BB7A-DXSkk"
         }
       ],
       "services": {

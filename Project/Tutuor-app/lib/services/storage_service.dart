@@ -40,7 +40,7 @@ class StorageService {
       await doc.update({'tutorId': doc.id});
       return doc.id;
     } catch (e) {
-      return null;
+      throw Exception(getFirestoreErrorMessage(e));
     }
   }
 
