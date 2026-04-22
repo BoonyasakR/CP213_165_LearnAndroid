@@ -75,6 +75,18 @@ class MenuActivity : ComponentActivity() {
                 onOpenAdaptiveProfile = {
                     startActivity(Intent(this@MenuActivity, AdaptiveProfileActivity::class.java))
                 },
+                onOpenPart9 = {
+                    startActivity(Intent(this@MenuActivity, Part9Activity::class.java))
+                },
+                onOpenPart10 = {
+                    startActivity(Intent(this@MenuActivity, Part10Activity::class.java))
+                },
+                onOpenPart11 = {
+                    startActivity(Intent(this@MenuActivity, Part11Activity::class.java))
+                },
+                onOpenPart12 = {
+                    startActivity(Intent(this@MenuActivity, Part12Activity::class.java))
+                },
             )
         }
     }
@@ -98,6 +110,10 @@ private fun MenuScreen(
     onOpenWebViewInterop: () -> Unit,
     onOpenTransitionDemo: () -> Unit,
     onOpenAdaptiveProfile: () -> Unit,
+    onOpenPart9: () -> Unit,
+    onOpenPart10: () -> Unit,
+    onOpenPart11: () -> Unit,
+    onOpenPart12: () -> Unit,
 ) {
     val menuItems = listOf(
         "Camera Permission Flow" to onOpenCameraFlow,
@@ -116,6 +132,10 @@ private fun MenuScreen(
         "Mission 6: WebView Interop" to onOpenWebViewInterop,
         "Mission 7: Activity Transition Demo" to onOpenTransitionDemo,
         "Mission 8: Adaptive Profile Layout" to onOpenAdaptiveProfile,
+        "Mission 9: Collapsing Header" to onOpenPart9,
+        "Mission 10: App Widget with Glance" to onOpenPart10,
+        "Mission 11: Skeleton Loading" to onOpenPart11,
+        "Mission 12: Bottom Sheet and Dialog" to onOpenPart12,
     )
 
     Column(
